@@ -1,4 +1,4 @@
 {
-  "extends": "@workspace/typescript-config/base.json"
+  "extends": "@bugpilot/typescript-config/base.json"
 }
 

@@ -1,0 +1,36 @@
+{
+  "name": "@bugpilot/logpilot-react-native",
+  "version": "0.0.4",
+  "description": "Error tracking library for React Native with Expo support",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "publish-package": "pnpm run build && changeset version && changeset publish"
+  },
+  "keywords": [
+    "react-native",
+    "expo",
+    "error-tracking",
+    "monitoring"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "peerDependencies": {
+    "expo": "*",
+    "react-native": "*"
+  },
+  "dependencies": {
+    "@bugpilot/common": "workspace:*",
+    "axios": "^1.8.4"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.28.1",
+    "@bugpilot/typescript-config": "workspace:*",
+    "@types/react-native": "^0.72.0",
+    "jest": "^29.0.0",
+    "react-native": "^0.78.2",
+    "tsup": "^8.4.0",
+    "typescript": "^5.0.0"
+  }
+}

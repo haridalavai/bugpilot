@@ -1,3 +1,3 @@
-# `@workspace/eslint-config`
+# `@bugpilot/eslint-config`
 
 Shared eslint configuration for the workspace.

@@ -9,7 +9,7 @@ import {
   SignInButton,
   SignUpButton,
   SignedIn,
-  SignedOut,
+  SignedOut, 
   UserButton,
 } from '@clerk/nextjs'
 import { AppSidebar } from "@bugpilot/ui/components/app-sidebar"

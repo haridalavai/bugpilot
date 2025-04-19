@@ -1,5 +1,5 @@
 import { IsString, IsNotEmpty, IsNumber, IsOptional, IsArray, IsObject } from "class-validator";
-import { InjestPayload } from "@logpilot/common";
+import { InjestPayload, StacktraceFrame, DeviceInfo } from "@bugpilot/common";
 
 export class IngestEventDto implements InjestPayload {
   @IsString()
@@ -30,9 +30,9 @@ export class IngestEventDto implements InjestPayload {
   @IsOptional()
   environment?: string;
 
-  @IsString()
+  @IsArray()
   @IsOptional()
-  stacktrace?: string;
+  stacktrace?: StacktraceFrame[];
 
   @IsArray()
   @IsOptional()
@@ -48,11 +48,10 @@ export class IngestEventDto implements InjestPayload {
 
   @IsObject()
   @IsOptional()
-  device?: Record<any, any>;
+  device?: DeviceInfo;
 
   @IsArray()
   @IsOptional()
-  
   breadcrumbs?: Record<any, any>[];
 }
     

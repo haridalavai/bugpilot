@@ -1,4 +1,4 @@
-import { InjestPayload } from "@logpilot/common";
+import { InjestPayload } from "@bugpilot/common";
 import axios from 'axios';
 
 interface ErrorTrackerConfig {

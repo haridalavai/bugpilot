@@ -7,6 +7,7 @@ import { PrismaService } from './database/prisma.service';
 import { ClickhouseService } from './database/clickhouse.service';
 import { ProjectsModule } from './modules/projects/projects.module';
 import { IngestionModule } from './modules/ingestion/ingestion.module';
+import { IssuesModule } from './modules/issues/issues.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -15,7 +16,8 @@ import { IngestionModule } from './modules/ingestion/ingestion.module';
   }),
     AuthenticationModule,
     ProjectsModule,
-    IngestionModule,],
+    IngestionModule,
+    IssuesModule,],
   controllers: [AppController],
   providers: [AppService, ClickhouseService],
   exports: [ClickhouseService],

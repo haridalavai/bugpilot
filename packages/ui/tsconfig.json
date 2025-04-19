@@ -6,6 +6,6 @@
       "@bugpilot/ui/*": ["./src/*"]
     }
   },
-  "include": ["."],
+  "include": [".", "src/components/app-sidebar.tsx", "src/components/sidebar.tsx"],
   "exclude": ["node_modules", "dist"]
 }

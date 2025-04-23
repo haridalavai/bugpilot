@@ -39,28 +39,28 @@ export const sidebarData = {
     projects: [],
     navMain: [
       {
-        title: "Playground",
-        url: "#",
+        title: "Issues",
+        url: "/",
         icon: SquareTerminal,
         isActive: true,
         items: [
           {
-            title: "History",
-            url: "#",
+            title: "Error",
+            url: "/issues?level=error",
           },
           {
-            title: "Starred",
-            url: "#",
+            title: "Warning",
+            url: "/issues?level=warning",
           },
           {
-            title: "Settings",
-            url: "#",
+            title: "Info",
+            url: "/issues?level=info",
           },
         ],
       },
       {
-        title: "Models",
-        url: "#",
+        title: "Projects",
+        url: "/projects",
         icon: Bot,
         items: [
           {

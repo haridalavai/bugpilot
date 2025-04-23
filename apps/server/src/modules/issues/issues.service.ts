@@ -3,7 +3,6 @@ import { PrismaService } from 'src/database/prisma.service';
 import { Prisma } from '@prisma/client';
 
 interface FindAllParams {
-  projectId: string;
   skip: number;
   take: number;
   filters?: {
@@ -12,14 +11,14 @@ interface FindAllParams {
     search?: string;
     from?: string;
     to?: string;
+    projectId?: string;
   };
 }
 
 class IssueFilterBuilder {
   private whereClause: any = {};
 
-  constructor(projectId: string) {
-    this.whereClause.projectId = projectId;
+  constructor() {
   }
 
   withLevel(level?: string) {
@@ -46,6 +45,13 @@ class IssueFilterBuilder {
     return this;
   }
 
+  withProjectId(projectId?: string) {
+    if (projectId) {
+      this.whereClause.projectId = projectId;
+    }
+    return this;
+  }
+
   withDateRange(from?: string, to?: string) {
     if (from || to) {
       this.whereClause.timestamp = {
@@ -65,13 +71,14 @@ class IssueFilterBuilder {
 export class IssuesService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll({ projectId, skip, take, filters }: FindAllParams) {
+  async findAll({ skip, take, filters }: FindAllParams) {
     // Build query conditions using the builder pattern
-    const where = new IssueFilterBuilder(projectId)
+    const where = new IssueFilterBuilder()
       .withLevel(filters?.level)
       .withType(filters?.type)
       .withSearch(filters?.search)
       .withDateRange(filters?.from, filters?.to)
+      .withProjectId(filters?.projectId)
       .build();
 
     // Get total count for pagination

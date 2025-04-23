@@ -1,15 +1,18 @@
 import { Controller, Get, Query, Param, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiQuery, ApiParam } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiQuery, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { IssuesService } from './issues.service';
+import { JwtAuthGuard } from '../authentication/jwt-auth.guard';
 
 @ApiTags('issues')
 @Controller('issues')
 export class IssuesController {
     constructor(private readonly issuesService: IssuesService) {}
 
-    @Get('project/:projectId')
+    @Get()
+    @UseGuards(JwtAuthGuard)
     @ApiOperation({ summary: 'Get all issues for a project' })
-    @ApiParam({ name: 'projectId', description: 'The ID of the project' })
+    @ApiBearerAuth()
+    @ApiQuery({ name: 'projectId', required: false, description: 'The ID of the project' })
     @ApiQuery({ name: 'page', required: false, description: 'Page number (default: 1)' })
     @ApiQuery({ name: 'limit', required: false, description: 'Items per page (default: 10)' })
     @ApiQuery({ name: 'level', required: false, description: 'Filter by level (error, warning, info, etc.)' })
@@ -18,7 +21,7 @@ export class IssuesController {
     @ApiQuery({ name: 'from', required: false, description: 'Start date (ISO string)' })
     @ApiQuery({ name: 'to', required: false, description: 'End date (ISO string)' })
     async getProjectIssues(
-        @Param('projectId') projectId: string,
+        @Query('projectId') projectId: string,
         @Query('page') page = 1,
         @Query('limit') limit = 10,
         @Query('level') level?: string,
@@ -31,10 +34,10 @@ export class IssuesController {
         const take = +limit;
         
         return this.issuesService.findAll({
-            projectId,
             skip,
             take,
             filters: {
+                projectId,
                 level,
                 type: type ? +type : undefined,
                 search,

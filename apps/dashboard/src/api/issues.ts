@@ -29,6 +29,7 @@ export const getIssues = async (
   const token = await getToken({
     template: "logpilot_jwt",
   });
+  console.log(token);
   if (!token) {
     throw new Error("No token found");
   }

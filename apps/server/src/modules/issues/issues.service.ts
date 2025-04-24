@@ -82,10 +82,10 @@ export class IssuesService {
       .build();
 
     // Get total count for pagination
-    const total = await this.prisma.event.count({ where });
+    const total = await this.prisma.errorMeta.count({ where });
 
     // Get paginated results
-    const items = await this.prisma.event.findMany({
+    const items = await this.prisma.errorMeta.findMany({
       where,
       skip,
       take,

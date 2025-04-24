@@ -1,9 +1,6 @@
-export type InjestPayload = {
-   timestamp: string;
-   source: string;
-   type: number;
-   name: string;
-   message: string;
+import { BaseEvent } from "./base-event";
+
+export type ErrorPayload = BaseEvent & {
    level?: string;
    environment?: string;
    stacktrace?: StacktraceFrame[];

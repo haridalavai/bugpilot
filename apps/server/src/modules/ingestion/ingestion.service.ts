@@ -7,6 +7,8 @@ import { ClickhouseService } from 'src/database/clickhouse.service';
 import { PrismaService } from 'src/database/prisma.service';
 import { IngestEventDto } from './dto/injest.dto';
 import { v4 as uuidv4 } from 'uuid';
+import { IngestionStrategy } from './strategies/ingestion-strategy.interface';
+import { ErrorStrategy } from './strategies/error-ingestion-strategy';
 
 @Injectable()
 export class IngestionService {
@@ -36,45 +38,68 @@ export class IngestionService {
     return true;
   }
 
+  getStrategy(eventType: string): IngestionStrategy {
+    switch (eventType) {
+      case 'error':
+        return new ErrorStrategy(this.clickhouseService, this.prisma);
+      default:
+        throw new NotFoundException('Invalid event type');
+    }
+  }
+
   async ingest(body: IngestEventDto, projectId: string): Promise<void> {
     try {
-      console.log('Ingesting event', body);
       const traceId = uuidv4();
 
-      const event = await this.prisma.event.create({
-        data: {
-         project:{
-          connect: {
-            id: projectId
-          }
-         },
-         timestamp: body.timestamp,
-         message: body.message,
-         type: body.type,
-         level: body.level || "info",
-         traceId: traceId,
+      const eventType = body.eventType;
+      const payload = body.payload;
+      const sessionId = payload.sessionId;
+      const user = payload.user;
+
+      const session = await this.prisma.session.findUnique({
+        where: {
+          id: sessionId,
         },
       });
 
-      const client = this.clickhouseService.getClient();
-      const result = await client.insert({
-        table: 'events',
-        format: 'JSONEachRow',
-        values: [{ 
-          trace_id: traceId,
-          project_id: projectId,
-          device: body.device,
-          timestamp: body.timestamp,
-          source: body.source,
-          type: body.type,
-          message: body.message,
-          level: body.level,
-          environment: body.environment,
-          stacktrace: body.stacktrace,
-          tags: body.tags,
-        }],
+      let sessionUser = await this.prisma.sessionUser.findFirst({
+        where: {
+          email: user.email || 'anonymous@bugpilot.com',
+        },
       });
-      console.log(result);
+
+      if (!sessionUser) {
+        sessionUser = await this.prisma.sessionUser.create({
+          data: {
+            email: user.email || 'anonymous@bugpilot.com',
+            name: user.name || 'Anonymous',
+            image: user.image || '',
+            moreInfo: user.moreInfo || {},
+          },
+        });
+      }
+
+      if (!session) {
+        await this.prisma.session.create({
+          data: {
+            id: sessionId,
+            status: 'active',
+            project: {
+              connect: {
+                id: projectId,
+              },
+            },
+            sessionUser: {
+              connect: {
+                id: sessionUser.id,
+              },
+            },
+          },
+        });
+      }
+
+      const strategy = this.getStrategy(eventType);
+      await strategy.process(payload);
     } catch (error) {
       console.error(error);
       throw error;

@@ -103,7 +103,7 @@ export const columns: ColumnDef<Issue>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Last Seen" />
     ),
-    accessorKey: "last seen",
+    accessorKey: "timestamp",
     cell: ({ row }) => {
       return (
         <div className="flex w-[100px] items-center">

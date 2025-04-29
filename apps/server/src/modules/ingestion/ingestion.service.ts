@@ -84,6 +84,8 @@ export class IngestionService {
           data: {
             id: sessionId,
             status: 'active',
+            source: payload.source,
+            environment: payload.environment,
             project: {
               connect: {
                 id: projectId,

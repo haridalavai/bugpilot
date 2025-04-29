@@ -10,11 +10,7 @@ export class ErrorStrategy implements IngestionStrategy {
     private readonly clickhouseService: ClickhouseService,
     private readonly prisma: PrismaService,
   ) {}
-
-  async validatePayload(payload: ErrorPayload): Promise<boolean> {
-    // check if payload is of instance of ErrorPayload
-    return payload instanceof ErrorPayload;
-  }
+  
   async process(payload: ErrorPayload): Promise<{ success: boolean }> {
     try {
       console.log('Processing error:', payload);
@@ -35,6 +31,25 @@ export class ErrorStrategy implements IngestionStrategy {
          message: payload.message,
          level: payload.level || "info",
          traceId: traceId,
+        },
+      });
+
+      const error = await this.prisma.errorMeta.create({
+        data: {
+          level: payload.level,
+          message: payload.message,
+          timestamp: payload.timestamp,
+          traceId: traceId,
+          project: {
+            connect: {
+              id: payload.projectId,
+            },
+          },
+          session: {
+            connect: {
+              id: payload.sessionId,
+            },
+          },
         },
       });
 

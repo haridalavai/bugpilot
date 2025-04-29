@@ -1,7 +1,7 @@
 import { apiClient } from "./apiClient";
 import { API_ENDPOINTS } from "./api-endpoints";
 import { Issue } from "@/src/components/issues/issues-data-table/issues-data-columns";
-import { auth } from "@clerk/nextjs/server";
+import { getToken } from "@/src/utils/get-token";
 
 export type GetIssuesParams = {
   projectId?: string;
@@ -25,17 +25,22 @@ export const getIssues = async (
     hasMore: boolean;
   };
 }> => {
-  const { getToken } = await auth();
-  const token = await getToken({
-    template: "logpilot_jwt",
-  });
-  console.log(token);
-  if (!token) {
-    throw new Error("No token found");
-  }
+  const token = await getToken();
   const response = await apiClient.get(API_ENDPOINTS.ISSUES, params, {
     Authorization: `Bearer ${token}`,
   });
 
+  return response;
+};
+
+export const getIssue = async (id: string): Promise<any> => {
+  const token = await getToken();
+  const response = await apiClient.get(
+    `${API_ENDPOINTS.ISSUES}/${id}`,
+    {},
+    {
+      Authorization: `Bearer ${token}`,
+    }
+  );
   return response;
 };

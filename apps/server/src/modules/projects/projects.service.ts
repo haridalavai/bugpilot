@@ -27,11 +27,21 @@ export class ProjectsService {
 
       const apiKey = await this.generateApiKey(projectData.name);
 
+      console.log('Creating project----\n', {
+        name: projectData.name,
+        slug: slug,
+        userId: userId,
+      });
+
       const project = await this.prisma.project.create({
         data: {
           name: projectData.name,
           slug: slug,
-          userId: userId,
+          user: {
+            connect: {
+              id: userId,
+            }
+          },
         },
       });
 

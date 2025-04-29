@@ -4,6 +4,7 @@ import { DataTableColumnHeader } from "./issues-table-column-header";
 import { Badge } from "@bugpilot/ui/components/badge";
 import { levels } from "./constants";
 import { DataTableRowActions } from "./issue-table-row-actions";
+import Link from "next/link";
 
 export type Issue = {
   id: string;
@@ -53,7 +54,9 @@ export const columns: ColumnDef<Issue>[] = [
         <div className="flex gap-7">
           {/* <Badge variant="outline">{row.original.level}</Badge>    */}
           <span className="max-w-[500px] truncate font-medium">
-            {row.getValue("message")}
+            <Link href={`/issues/${row.original.id}`}>
+              {row.getValue("message")}
+            </Link>
           </span>
         </div>
       );

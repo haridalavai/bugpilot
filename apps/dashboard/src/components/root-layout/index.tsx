@@ -34,7 +34,9 @@ const RootLayoutComponent = ({ children }: { children: React.ReactNode }) => {
           signOut={signOut}
           dropdownItems={dropdownItems}
         />
-        {/* <SidebarInset className="overflow-x-hidden">
+
+        <main className="overflow-x-hidden w-full">
+          {/* <SidebarInset className="overflow-x-hidden">
             <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 border-b border-border">
               <div className="flex items-center gap-2 px-4">
                 <SidebarTrigger className="-ml-1" />
@@ -54,9 +56,7 @@ const RootLayoutComponent = ({ children }: { children: React.ReactNode }) => {
                 </Breadcrumb>
               </div>
             </header>
-            
           </SidebarInset> */}
-        <main className="overflow-x-hidden w-full" >
           <Providers>{children}</Providers>
         </main>
       </SidebarProvider>

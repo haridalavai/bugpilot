@@ -30,7 +30,8 @@
     "@bugpilot/common": "workspace:*",
     "detect-browser": "^5.3.0",
     "i": "^0.3.7",
-    "npm": "^11.3.0"
+    "npm": "^11.3.0",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.0",

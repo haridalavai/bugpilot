@@ -12,6 +12,7 @@ import {
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
+  SidebarTrigger,
 } from "@bugpilot/ui/components/sidebar";
 import { LucideIcon } from "lucide-react";
 interface Team {
@@ -71,6 +72,7 @@ export function AppSidebar({
         <NavProjects projects={projects} />
       </SidebarContent>
       <SidebarFooter>
+        <SidebarTrigger  />
         <NavUser user={user} signOut={signOut} dropdownItems={dropdownItems} />
       </SidebarFooter>
       <SidebarRail />

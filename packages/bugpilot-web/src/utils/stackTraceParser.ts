@@ -1,9 +1,9 @@
-import { StacktraceFrame, SourceCodeContext } from "@bugpilot/common";
+import { IStacktraceFrame, SourceCodeContext } from "@bugpilot/common";
 
-export async function parseStackTrace(error: Error): Promise<StacktraceFrame[]> {
+export async function parseStackTrace(error: Error): Promise<IStacktraceFrame[]> {
     const stack = error.stack || '';
     const lines = stack.split('\n').slice(1); // Remove the error message line
-    const stackFrames: Promise<StacktraceFrame>[] = [];
+    const stackFrames: Promise<IStacktraceFrame>[] = [];
 
     for (const line of lines) {
         // Chrome/Firefox style: "at functionName (fileName:lineNumber:columnNumber)"

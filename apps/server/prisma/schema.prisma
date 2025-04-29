@@ -30,7 +30,7 @@ model Project {
   name      String
   slug      String      @unique
   userId    String
-  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User        @relation(fields: [userId], references: [externalId], onDelete: Cascade)
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
   apiKey    ApiKey?
@@ -64,6 +64,8 @@ model Session {
   status        String
   projectId     String
   project       Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  source        String
+  environment   String
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
   sessionUserId String

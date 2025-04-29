@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/database/prisma.service';
 import { Prisma } from '@prisma/client';
+import { ClickhouseService } from 'src/database/clickhouse.service';
 
 interface FindAllParams {
   skip: number;
@@ -18,8 +19,7 @@ interface FindAllParams {
 class IssueFilterBuilder {
   private whereClause: any = {};
 
-  constructor() {
-  }
+  constructor() {}
 
   withLevel(level?: string) {
     if (level) {
@@ -37,9 +37,9 @@ class IssueFilterBuilder {
 
   withSearch(search?: string) {
     if (search) {
-      this.whereClause.message = { 
-        contains: search, 
-        mode: Prisma.QueryMode.insensitive 
+      this.whereClause.message = {
+        contains: search,
+        mode: Prisma.QueryMode.insensitive,
       };
     }
     return this;
@@ -56,7 +56,7 @@ class IssueFilterBuilder {
     if (from || to) {
       this.whereClause.timestamp = {
         ...(from ? { gte: from } : {}),
-        ...(to ? { lte: to } : {})
+        ...(to ? { lte: to } : {}),
       };
     }
     return this;
@@ -69,7 +69,10 @@ class IssueFilterBuilder {
 
 @Injectable()
 export class IssuesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private clickhouseService: ClickhouseService,
+  ) {}
 
   async findAll({ skip, take, filters }: FindAllParams) {
     // Build query conditions using the builder pattern
@@ -101,5 +104,26 @@ export class IssuesService {
         hasMore: skip + take < total,
       },
     };
+  }
+
+  async findById(id: string) {
+    const errorMeta = await this.prisma.errorMeta.findUnique({
+      where: { id },
+      include: {
+        session: true,
+      },
+    });
+
+    if (!errorMeta) {
+      throw new NotFoundException('Issue not found');
+    }
+
+    const clickhouseClient = this.clickhouseService.getClient();
+
+    const issue = await clickhouseClient.query({
+      query: `SELECT * FROM events WHERE trace_id = '${errorMeta.traceId}'`,
+    });
+
+    return { meta: errorMeta, data: await issue.json() };
   }
 }

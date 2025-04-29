@@ -1,4 +1,4 @@
-import { DeviceInfo } from "@bugpilot/common/types/InjestPayload.type";
+import { DeviceInfo } from "@bugpilot/common";
 
 
 function getBrowserInfo(): DeviceInfo['browser'] {

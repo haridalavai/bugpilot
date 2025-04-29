@@ -1,9 +1,9 @@
 {
-    "extends": "@repo/typescript-config/react-library.json",
+    "extends": "@bugpilot/typescript-config/base.json",
     "compilerOptions": {
       "outDir": "dist"
     },
-    "include": ["src"],
+    "include": ["types"],
     "exclude": ["node_modules", "dist", "**/__tests__/*"]
   }
   

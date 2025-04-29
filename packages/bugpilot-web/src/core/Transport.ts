@@ -1,4 +1,4 @@
-import { InjestPayload } from "@bugpilot/common";
+import { IncomingEvent, ErrorPayload } from "@bugpilot/common";
 
 export interface TransportOptions {
     endpoint?: string;
@@ -24,7 +24,7 @@ export class Transport {
         };
     }
 
-    public async sendError(report: InjestPayload): Promise<void> {
+    public async sendError(report: ErrorPayload): Promise<void> {
         if (this.isErrorReporting) {
             if (this.debug) {
                 console.warn('Prevented recursive error reporting');
@@ -35,11 +35,15 @@ export class Transport {
         try {
             this.isErrorReporting = true;
 
-            console.log('newwwwwwwwwwwwwwwwwwwwwwwww')
             const response = await fetch(this.endpoint, {
                 method: 'POST',
                 headers: this.headers,
-                body: JSON.stringify(report)
+                body: JSON.stringify({
+                    eventType: 'error',
+                    payload: {
+                        ...report,
+                    },
+                })
             });
 
             if (!response.ok) {

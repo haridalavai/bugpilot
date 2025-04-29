@@ -46,4 +46,12 @@ export class IssuesController {
             }
         });
     }
+
+    @Get(':id')
+    @UseGuards(JwtAuthGuard)
+    @ApiOperation({ summary: 'Get an issue by ID' })
+    @ApiBearerAuth()
+    async getIssueById(@Param('id') id: string) {
+        return this.issuesService.findById(id);
+    }
 }

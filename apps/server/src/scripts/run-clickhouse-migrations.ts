@@ -5,20 +5,22 @@ import * as dotenv from 'dotenv';
 
 // Load environment variables
 dotenv.config({
-  path: path.join(__dirname, '../.env')
+  path: path.join(__dirname, '../.env'),
 });
 
 async function runMigrations() {
   // Get migration directory path
-  const migrationDir = path.join(__dirname, '../database/migrations/clickhouse');
+  const migrationDir = path.join(
+    __dirname,
+    '../database/migrations/clickhouse',
+  );
 
-  
   // Create ClickHouse client
   const client = createClient({
-    host: process.env.CLICKHOUSE_URL || 'http://localhost:8123',
-    username: process.env.CLICKHOUSE_USER || 'logpilot',
-    password: process.env.CLICKHOUSE_PASSWORD || 'logpilot',
-    database: process.env.CLICKHOUSE_DB || 'logpilot',
+    host: "https://znl41758c6.us-west-2.aws.clickhouse.cloud:8443",
+    username: "default",
+    password: "GM2OJne~98Y_m",
+    database: "bugpilot",
   });
 
   try {
@@ -33,20 +35,23 @@ async function runMigrations() {
           content_hash String
         ) ENGINE = MergeTree()
         ORDER BY name
-      `
-    })
+      `,
+    });
 
     // Get list of applied migrations
     const result = await client.query({
       query: `SELECT name FROM migrations`,
-      format: 'JSONEachRow'
+      format: 'JSONEachRow',
     });
     const appliedMigrations = await result.json();
-    const appliedMigrationNames = new Set(appliedMigrations.map((m: any) => m.name));
+    const appliedMigrationNames = new Set(
+      appliedMigrations.map((m: any) => m.name),
+    );
 
     // Get migration files
-    const files = fs.readdirSync(migrationDir)
-      .filter(file => file.endsWith('.sql'))
+    const files = fs
+      .readdirSync(migrationDir)
+      .filter((file) => file.endsWith('.sql'))
       .sort(); // Ensure files are processed in alphabetical order
 
     if (files.length === 0) {
@@ -63,23 +68,25 @@ async function runMigrations() {
         const contentHash = Buffer.from(content).toString('base64');
 
         console.log(`🔼 Applying migration: ${file}`);
-        
+
         try {
           // Execute migration
           await client.query({
             query: content,
           });
-          
+
           // Record migration
           await client.insert({
             table: 'migrations',
-            values: [{ 
-              name: file,
-              content_hash: contentHash 
-            }],
-            format: 'JSONEachRow'
+            values: [
+              {
+                name: file,
+                content_hash: contentHash,
+              },
+            ],
+            format: 'JSONEachRow',
           });
-          
+
           console.log(`✅ Successfully applied: ${file}`);
           migrationsApplied++;
         } catch (error) {
@@ -96,7 +103,6 @@ async function runMigrations() {
     } else {
       console.log(`✅ Applied ${migrationsApplied} migrations successfully`);
     }
-
   } catch (error) {
     console.error('Failed to run migrations:', error);
     process.exit(1);
@@ -112,7 +118,7 @@ if (require.main === module) {
       console.log('Migration script completed');
       process.exit(0);
     })
-    .catch(err => {
+    .catch((err) => {
       console.error('Migration script failed:', err);
       process.exit(1);
     });

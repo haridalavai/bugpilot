@@ -1,16 +1,19 @@
-import { InjestPayload, StacktraceFrame } from "@bugpilot/common";
+import { ErrorPayload, IStacktraceFrame, ISessionUser } from "@bugpilot/common";
 import { getDeviceInfo } from "../utils/deviceInfo";
 import { BreadcrumbManager } from "./BreadcrumbManager";
-import { Transport, TransportOptions } from './Transport';
-import { parseStackTrace } from '../utils/stackTraceParser';
+import { Transport, TransportOptions } from "./Transport";
+import { parseStackTrace } from "../utils/stackTraceParser";
+import { v4 as uuidv4 } from "uuid";
 
 interface ErrorTrackerOptions {
   environment?: string;
+  sessionId?: string;
+  user?: ISessionUser;
   release?: string;
   maxBreadcrumbs?: number;
   beforeSend?: (error: Error) => Error | null;
   ignoreErrors?: Array<string | RegExp>;
-  tags?: Record<string, string>;
+  tags?: string[];
   debug?: boolean;
   transport?: TransportOptions;
 }
@@ -18,55 +21,61 @@ interface ErrorTrackerOptions {
 class ErrorTracker {
   private static instance: ErrorTracker;
   private apiKey: string;
+  private projectId: string;
   private options: ErrorTrackerOptions;
   private breadcrumbManager: BreadcrumbManager;
   private transport: Transport;
 
-  private constructor(apiKey: string, options: ErrorTrackerOptions = {}) {
+  private constructor(apiKey: string, projectId: string, options?: ErrorTrackerOptions) {
     this.apiKey = apiKey;
-    this.options = {
-      environment: 'production',
-      maxBreadcrumbs: 100,
-      debug: false,
-      ...options
-    };
+    this.projectId = projectId;
+    this.options = options || {};
 
     this.breadcrumbManager = new BreadcrumbManager(this.options.maxBreadcrumbs);
     this.transport = new Transport(this.apiKey, {
       debug: this.options.debug,
-      ...this.options.transport
+      ...this.options.transport,
     });
-    
+
     this.init();
   }
 
   private init(): void {
-    if (typeof window !== 'undefined') {
-        
-    window.onerror = (message, source, lineno, colno, error) => {
-      this.captureError(error || message);
-    };
+    if (typeof window !== "undefined") {
+      window.onerror = (message, source, lineno, colno, error) => {
+        this.captureError(error || message);
+      };
 
-    window.onunhandledrejection = (event) => {
-      this.captureError(event.reason);
-    };
+      window.onunhandledrejection = (event) => {
+        this.captureError(event.reason);
+      };
 
-    if (this.options.debug) {
-      console.log('BugPilot initialized with options:', this.options);
-    }
+      if (this.options.debug) {
+        console.log("BugPilot initialized with options:", this.options);
+      }
     }
   }
 
-  public async captureError(error: Error | string | Event, context?: Record<string, any>): Promise<void> {
+  public async captureError(
+    error: Error | string | Event,
+    context?: Record<string, any>
+  ): Promise<void> {
     // Ignore errors that come from our own SDK's reporting
-    if (error instanceof Error && error.message.includes('Failed to send error report')) {
-        if (this.options.debug) {
-            console.warn('Ignored error from error reporting service:', error.message);
-        }
-        return;
+    if (
+      error instanceof Error &&
+      error.message.includes("Failed to send error report")
+    ) {
+      if (this.options.debug) {
+        console.warn(
+          "Ignored error from error reporting service:",
+          error.message
+        );
+      }
+      return;
     }
 
-    const errorObject = error instanceof Error ? error : new Error(String(error));
+    const errorObject =
+      error instanceof Error ? error : new Error(String(error));
 
     if (this.shouldIgnoreError(errorObject)) {
       return;
@@ -77,23 +86,27 @@ class ErrorTracker {
       if (!modifiedError) return;
     }
 
-    const stackFrames: StacktraceFrame[] = await parseStackTrace(errorObject);
+    const stackFrames: IStacktraceFrame[] = await parseStackTrace(errorObject);
 
-    const errorReport: InjestPayload = {
+    const errorReport: ErrorPayload = {
       message: errorObject.message,
-      name: errorObject.name,
-      type: 1,
       timestamp: Date.now().toString(),
       stacktrace: stackFrames,
-      environment: this.options.environment,
-      source: 'web',
+      source: "web",
       device: getDeviceInfo(),
       tags: this.options.tags ? Object.values(this.options.tags) : [],
       breadcrumbs: this.breadcrumbManager.getBreadcrumbs(),
-      level: 'error',
+      level: "error",
+      environment: this.options.environment || "development",
+      projectId: this.projectId,
+      sessionId: this.options.sessionId || uuidv4(),
+      user: this.options.user || {
+        email: "anonymous@bugpilot.com",
+        name: "Anonymous",
+      },
       extra: {
         ...context,
-      }
+      },
     };
 
     this.transport.sendError(errorReport);
@@ -102,7 +115,7 @@ class ErrorTracker {
   private shouldIgnoreError(error: Error): boolean {
     if (!this.options.ignoreErrors) return false;
 
-    return this.options.ignoreErrors.some(pattern => {
+    return this.options.ignoreErrors.some((pattern) => {
       if (pattern instanceof RegExp) {
         return pattern.test(error.message);
       }
@@ -110,12 +123,16 @@ class ErrorTracker {
     });
   }
 
-  public static getInstance(apiKey: string, options?: ErrorTrackerOptions): ErrorTracker {
+  public static getInstance(
+    apiKey: string,
+    projectId: string,
+    options?: ErrorTrackerOptions
+  ): ErrorTracker {
     if (!ErrorTracker.instance) {
-      ErrorTracker.instance = new ErrorTracker(apiKey, options);
+      ErrorTracker.instance = new ErrorTracker(apiKey, projectId, options);
     }
     return ErrorTracker.instance;
   }
 }
 
-export { ErrorTracker, type ErrorTrackerOptions }; 
+export { ErrorTracker, type ErrorTrackerOptions };

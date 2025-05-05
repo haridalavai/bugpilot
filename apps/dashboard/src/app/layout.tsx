@@ -1,15 +1,14 @@
 import { Geist, Geist_Mono } from "next/font/google";
-
 import "@bugpilot/ui/globals.css";
-
 import { Button } from "@bugpilot/ui/components/button";
+import { ErrorTracker } from "@bugpilot/web";
+import RootLayout from "../components/root-layout";
+import { Providers } from "../components/providers";
 
 const fontSans = Geist({
   subsets: ["latin"],
   variable: "--font-sans",
 });
-import { ErrorTracker } from "@bugpilot/web";
-import RootLayout from "../components/root-layout";
 
 // Initialize in your app's entry point
 const bugpilot = ErrorTracker.getInstance(
@@ -39,9 +38,11 @@ export default function RootLayoutContent({
       <body
         className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased `}
       >
-        <RootLayout>
-          {children}
-        </RootLayout>
+        <Providers>
+          <RootLayout>
+            {children}
+          </RootLayout>
+        </Providers>
         {/* <Button
           onClick={() => bugpilot.captureError(new Error("Test error"))}
           className="fixed right-5 bottom-5 z-50"

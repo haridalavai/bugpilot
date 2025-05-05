@@ -85,6 +85,7 @@ export class IngestionService {
             id: sessionId,
             status: 'active',
             source: payload.source,
+            createdAt: new Date(),
             environment: payload.environment,
             project: {
               connect: {

@@ -7,7 +7,6 @@ import { v4 as uuidv4 } from "uuid";
 
 interface ErrorTrackerOptions {
   environment?: string;
-  sessionId?: string;
   user?: ISessionUser;
   release?: string;
   maxBreadcrumbs?: number;
@@ -23,13 +22,19 @@ class ErrorTracker {
   private apiKey: string;
   private projectId: string;
   private options: ErrorTrackerOptions;
+  private sessionId: string;
   private breadcrumbManager: BreadcrumbManager;
   private transport: Transport;
 
-  private constructor(apiKey: string, projectId: string, options?: ErrorTrackerOptions) {
+  private constructor(
+    apiKey: string,
+    projectId: string,
+    options?: ErrorTrackerOptions
+  ) {
     this.apiKey = apiKey;
     this.projectId = projectId;
     this.options = options || {};
+    this.sessionId = uuidv4();
 
     this.breadcrumbManager = new BreadcrumbManager(this.options.maxBreadcrumbs);
     this.transport = new Transport(this.apiKey, {
@@ -49,6 +54,49 @@ class ErrorTracker {
       window.onunhandledrejection = (event) => {
         this.captureError(event.reason);
       };
+
+      // Add session end detection
+      window.addEventListener("beforeunload", () => {
+        // This is a good place to send any final data before the page unloads
+        if (this.options.debug) {
+          console.log("Session ending - beforeunload event");
+          this.transport.sendUpdateSession({
+            sessionId: this.sessionId,
+            timestamp: Date.now().toString(),
+            projectId: this.projectId,
+            source: "web",
+            message: "Session ended",
+            environment: this.options.environment || "development",
+            user: this.options.user || {
+              email: "anonymous@bugpilot.com",
+              name: "Anonymous",
+            },
+            status: "ended",
+            endTime: Date.now().toString(),
+          });
+        }
+      });
+
+      window.addEventListener("unload", () => {
+        // This is the last chance to send data before the page closes
+        if (this.options.debug) {
+          console.log("Session ending - unload event");
+          this.transport.sendUpdateSession({
+            sessionId: this.sessionId,
+            timestamp: Date.now().toString(),
+            projectId: this.projectId,
+            source: "web",
+            message: "Session ended",
+            environment: this.options.environment || "development",
+            user: this.options.user || {
+              email: "anonymous@bugpilot.com",
+              name: "Anonymous",
+            },
+            status: "ended",
+            endTime: Date.now().toString(),
+          });
+        }
+      });
 
       if (this.options.debug) {
         console.log("BugPilot initialized with options:", this.options);
@@ -99,7 +147,7 @@ class ErrorTracker {
       level: "error",
       environment: this.options.environment || "development",
       projectId: this.projectId,
-      sessionId: this.options.sessionId || uuidv4(),
+      sessionId: this.sessionId,
       user: this.options.user || {
         email: "anonymous@bugpilot.com",
         name: "Anonymous",

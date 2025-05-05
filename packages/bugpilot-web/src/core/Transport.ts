@@ -1,4 +1,4 @@
-import { IncomingEvent, ErrorPayload } from "@bugpilot/common";
+import { IncomingEvent, ErrorPayload, UpdateSessionPayload } from "@bugpilot/common";
 
 export interface TransportOptions {
     endpoint?: string;
@@ -63,6 +63,19 @@ export class Transport {
         } finally {
             this.isErrorReporting = false;
         }
+    }
+
+    public async sendUpdateSession(payload: UpdateSessionPayload): Promise<void> {
+        const response = await fetch(this.endpoint, {
+            method: 'POST',
+            headers: this.headers,
+            body: JSON.stringify({
+                eventType: 'updateSession',
+                payload: {
+                    ...payload,
+                },
+            }),
+        });
     }
 
     public setEndpoint(endpoint: string): void {

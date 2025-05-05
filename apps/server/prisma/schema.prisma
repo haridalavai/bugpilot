@@ -67,6 +67,8 @@ model Session {
   source        String
   environment   String
   createdAt     DateTime    @default(now())
+  startTime     DateTime?
+  endTime       DateTime?
   updatedAt     DateTime    @updatedAt
   sessionUserId String
   sessionUser   SessionUser @relation(fields: [sessionUserId], references: [id], onDelete: Cascade, name: "SessionToSessionUser")

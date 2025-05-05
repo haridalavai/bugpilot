@@ -18,6 +18,6 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts"
-, "../../packages/ui/src/components/sidebar.tsx", "../../packages/ui/src/components/app-sidebar.tsx"  ],
+, "../../packages/ui/src/components/sidebar.tsx", "../../packages/ui/src/components/app-sidebar.tsx", "src/components/issues/issue-details/syntax-highlighter-theme.js"  ],
   "exclude": ["node_modules"]
 }

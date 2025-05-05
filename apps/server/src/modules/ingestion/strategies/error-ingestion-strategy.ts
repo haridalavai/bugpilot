@@ -4,6 +4,7 @@ import { ErrorPayload } from '@bugpilot/common';
 import { ClickhouseService } from 'src/database/clickhouse.service';
 import { PrismaService } from 'src/database/prisma.service';
 import { v4 as uuidv4 } from 'uuid';
+
 @Injectable()
 export class ErrorStrategy implements IngestionStrategy {
   constructor(

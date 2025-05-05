@@ -19,7 +19,7 @@ import {
 import { Providers } from "@/src/components/providers";
 import { ClerkProvider, useAuth } from "@clerk/nextjs";
 import { Separator } from "@bugpilot/ui/components/separator";
-
+import { Toolbar } from "@/src/components/toolbar";
 const RootLayoutComponent = ({ children }: { children: React.ReactNode }) => {
   const { signOut } = useAuth();
   return (
@@ -36,8 +36,8 @@ const RootLayoutComponent = ({ children }: { children: React.ReactNode }) => {
         />
 
         <main className="overflow-x-hidden w-full">
-          {/* <SidebarInset className="overflow-x-hidden">
-            <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 border-b border-border">
+          <SidebarInset className="overflow-x-hidden">
+            <header className="flex h-12 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 border-b border-border">
               <div className="flex items-center gap-2 px-4">
                 <SidebarTrigger className="-ml-1" />
                 <Separator orientation="vertical" className="mr-2 h-4" />
@@ -56,10 +56,12 @@ const RootLayoutComponent = ({ children }: { children: React.ReactNode }) => {
                 </Breadcrumb>
               </div>
             </header>
-          </SidebarInset> */}
+          </SidebarInset>
           <Providers>{children}</Providers>
         </main>
+        <Toolbar />
       </SidebarProvider>
+       
       {/* <div className="container-wrapper">
         <div className="container py-6">
           <section className="overflow-hidden rounded-[0.5rem]  bg-background shadow w-full"> */}
